@@ -4,7 +4,8 @@ import heapq
 
 
 class Dijkstra:
-    def __init__(self, source_node, end_node, early_exit = True):
+    def __init__(self, source_node, end_node, early_exit=True, heuristic=None):
+        # Use heuristic="astar" to use A* algorithm
         # Tracking variables
         self.shortest_paths_dist = {}
         self.shortest_paths_dist[source_node] = 0
@@ -17,16 +18,24 @@ class Dijkstra:
         explored = set()
         explored.add(source_node)
 
+        # Heuristic for astar algorithm
+        heuristic_dist = lambda node: node.distance(end_node) if heuristic == "astar" else 0
+
         # Init heap with neighbors of source node
         heap = []
-        for tail in source_node.neighbors:
-            heapq.heappush(heap, (source_node.distance(tail), source_node, tail))
+        for neighbor in source_node.neighbors:
+            heapq.heappush(heap, 
+                (heuristic_dist(neighbor) + source_node.distance(neighbor), 
+                source_node.distance(neighbor), 
+                source_node, 
+                neighbor)
+            )
 
         # Loop until heap is empty
         while heap:
             # Pop items from heap until an unexplored node is found
             while True:
-                dist, head, tail = heapq.heappop(heap)
+                hdist, dist, head, tail = heapq.heappop(heap)
                 if tail not in explored or not heap:
                     break
             
@@ -44,7 +53,12 @@ class Dijkstra:
             for new_node in tail.neighbors:
                 if new_node not in explored:
                     new_dist = dist + new_node.distance(tail)
-                    heapq.heappush(heap, (new_dist, tail, new_node))
+                    heapq.heappush(heap, 
+                        (heuristic_dist(new_node) + new_dist, 
+                        new_dist, 
+                        tail, 
+                        new_node)
+                    )
 
         self.shortest_path = self.shortest_paths[end_node]
         self.shortest_path_dist = self.shortest_paths_dist[end_node]

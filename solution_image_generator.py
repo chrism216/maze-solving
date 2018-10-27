@@ -1,13 +1,16 @@
 class Solution_image:
-    def __init__(self, im, sol, filename):
+    def __init__(self, im, sol, filename, draw_depth=False):
         # Output a solved image
         im = im.convert("RGB")
         pixels = im.load()
-        self.__paint_depth(sol, pixels)
-        self.__paint_sol(sol, pixels)
+
+        if draw_depth:
+            self.__draw_depth(sol, pixels)
+
+        self.__draw_sol(sol, pixels)
         im.save("maze_solutions/" + filename)
 
-    def __paint_depth(self, sol, pixels):
+    def __draw_depth(self, sol, pixels):
         # Color all dead end routes
         def color(progress, path_dist): 
             r = int(255*(progress/path_dist))
@@ -31,7 +34,7 @@ class Solution_image:
 
         pixels[path[-1].x, path[-1].y] = color(progress, sol.shortest_path_dist)
 
-    def __paint_sol(self, sol, pixels):
+    def __draw_sol(self, sol, pixels):
         # Paints shortest path solution
         progress = 0
         color = (0, 0, 255)

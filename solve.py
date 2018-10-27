@@ -5,7 +5,7 @@ import solution_image_generator
 import time
 
 
-def solve(filename):
+def solve(filename, heuristic=None, draw_depth=True):
     im = Image.open("maze_images/" + filename)
 
     t_total0 = time.time()
@@ -19,14 +19,14 @@ def solve(filename):
     # Solve maze
     print("Solving maze...")
     t0 = time.time()
-    sol = maze_solvers.Dijkstra(maze.start_node, maze.end_node)
+    sol = maze_solvers.Dijkstra(maze.start_node, maze.end_node, early_exit=draw_depth, heuristic=heuristic)
     t1 = time.time()
     print("Done. Time elapsed:", t1 - t0, "\n")
 
     # Generate solution image
     print("Generating image...")
     t0 = time.time()
-    solution_image_generator.Solution_image(im, sol, filename)
+    solution_image_generator.Solution_image(im, sol, filename, draw_depth=draw_depth)
     t1 = time.time()
     print("Done. Time elapsed:", t1 - t0, "\n")
 
@@ -34,6 +34,4 @@ def solve(filename):
     print("Total time:", t_total1 - t_total0)
 
 if __name__ == "__main__":
-    # Keep in mind: Algorithms like Dijkstra are much more memory-intensive
-    # than depth-first search. For really large mazes, RAM becomes an issue
-    solve("braid200.png")
+    solve("perfect2k.png", heuristic="astar", draw_depth=False)

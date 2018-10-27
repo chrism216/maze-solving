@@ -1,4 +1,4 @@
-from math import inf
+from math import inf, sqrt
 
 class Maze:
     def __init__(self, im):
@@ -8,13 +8,13 @@ class Maze:
         # Find starting node
         for x in range(width):
             if im.getpixel((x, 0)):
-                self.start_node = self.Node(x, 0)
+                self.start_node = Node(x, 0)
                 break
         
         # Find end node
         for x in range(width):
             if im.getpixel((x, height - 1)):
-                self.end_node = self.Node(x, height - 1)
+                self.end_node = Node(x, height - 1)
                 break
 
         # Maintain a record of the reachable nodes in rows above
@@ -36,7 +36,7 @@ class Maze:
                         if not(im.getpixel((x, y - 1)) and 
                                 im.getpixel((x, y + 1)) and 
                                 not im.getpixel((x + 1, y))):
-                            new_node = self.Node(x, y)
+                            new_node = Node(x, y)
                                 
                             # If up==path, set neighbors
                             if im.getpixel((x, y - 1)):
@@ -53,7 +53,7 @@ class Maze:
                         if not(not im.getpixel((x, y - 1)) and 
                                 not im.getpixel((x, y + 1)) and 
                                 im.getpixel((x + 1, y))):
-                            new_node = self.Node(x, y)
+                            new_node = Node(x, y)
 
                             # If up==path, set neighbors
                             if im.getpixel((x, y - 1)):
@@ -75,40 +75,37 @@ class Maze:
         self.end_node.add_neighbor(nodes_above[self.end_node.x])
         nodes_above[self.end_node.x].add_neighbor(self.end_node)
 
-    class Node:
-        def __init__(self, x, y):
-            self.x, self.y = x, y
-            self.neighbors = []
-            return
+class Node:
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+        self.neighbors = []
+        return
 
-        def distance(self, other):
-            if other in self.neighbors:
-                return abs(self.x - other.x) + abs(self.y - other.y)
-            else:
-                return inf
-        
-        def add_neighbor(self, other):
-            self.neighbors.append(other)
+    def distance(self, other):
+        return sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+    
+    def add_neighbor(self, other):
+        self.neighbors.append(other)
 
-        def __repr__(self):
-            return str((self.x, self.y))
+    def __repr__(self):
+        return str((self.x, self.y))
 
-        # For use in dicts and heaps
-        def __hash__(self):
-            return hash((self.x, self.y))
+    # For use in dicts and heaps
+    def __hash__(self):
+        return hash((self.x, self.y))
 
-        # # These methods are needed in order to use nodes in heaps.
-        def __eq__(self, other):
-            return self.x == other.x
+    # These methods are needed in order to use nodes in heaps.
+    def __eq__(self, other):
+        return self.x == other.x
 
-        def __lt__(self, other):
-            return self.x < other.x
+    def __lt__(self, other):
+        return self.x < other.x
 
-        def __le__(self, other):
-            return self.x <= other.x
+    def __le__(self, other):
+        return self.x <= other.x
 
-        def __gt__(self, other):
-            return self.x > other.x
+    def __gt__(self, other):
+        return self.x > other.x
 
-        def __ge__(self, other):
-            return self.x >= other.x
+    def __ge__(self, other):
+        return self.x >= other.x
