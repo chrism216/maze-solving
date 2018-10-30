@@ -1,19 +1,20 @@
 from math import inf, sqrt
+import numpy as np
 
 class Maze:
     def __init__(self, im):
         width, height = im.size
-        self.node_count = 0
+        pixels = np.asarray(im).transpose()
 
         # Find starting node
         for x in range(width):
-            if im.getpixel((x, 0)):
+            if pixels[x, 0]:
                 self.start_node = Node(x, 0)
                 break
         
         # Find end node
         for x in range(width):
-            if im.getpixel((x, height - 1)):
+            if pixels[x, height - 1]:
                 self.end_node = Node(x, height - 1)
                 break
 
@@ -25,21 +26,21 @@ class Maze:
         for y in range(1, height - 1):
             for x in range(1, width - 1):
                 # Current pixel not wall
-                if im.getpixel((x, y)):
+                if pixels[x, y]:
                     # Left pixel==wall
-                    if not im.getpixel((x - 1, y)):
+                    if not pixels[x - 1, y]:
                         # Wall on the left <=> no neighbors to the right of last_node
                         last_node = None
 
                         # The only scenario without node is 
                         # up==path and down==path and right==wall
-                        if not(im.getpixel((x, y - 1)) and 
-                                im.getpixel((x, y + 1)) and 
-                                not im.getpixel((x + 1, y))):
+                        if not(pixels[x, y - 1] and 
+                                pixels[x, y + 1] and 
+                                not pixels[x + 1, y]):
                             new_node = Node(x, y)
                                 
                             # If up==path, set neighbors
-                            if im.getpixel((x, y - 1)):
+                            if pixels[x, y - 1]:
                                 nodes_above[x].add_neighbor(new_node)
                                 new_node.add_neighbor(nodes_above[x])
 
@@ -50,13 +51,13 @@ class Maze:
                     else:
                         # The only scenario without node is 
                         # up==wall, down==wall, right==path
-                        if not(not im.getpixel((x, y - 1)) and 
-                                not im.getpixel((x, y + 1)) and 
-                                im.getpixel((x + 1, y))):
+                        if not(not pixels[x, y - 1] and 
+                                not pixels[x, y + 1] and 
+                                pixels[x + 1, y]):
                             new_node = Node(x, y)
 
                             # If up==path, set neighbors
-                            if im.getpixel((x, y - 1)):
+                            if pixels[x, y - 1]:
                                 nodes_above[x].add_neighbor(new_node)
                                 new_node.add_neighbor(nodes_above[x])
 
