@@ -1,16 +1,10 @@
 class Solution_image:
-    def __init__(self, im, sol, filename, draw_depth=False):
+    def __init__(self, im):
         # Output a solved image
-        im = im.convert("RGB")
-        pixels = im.load()
+        self.im = im.convert("RGB")
+        self.pixels = self.im.load()
 
-        if draw_depth:
-            self.__draw_depth(sol, pixels)
-
-        self.__draw_sol(sol, pixels)
-        im.save("maze_solutions/" + filename)
-
-    def __draw_depth(self, sol, pixels):
+    def draw_depth(self, dead_ends, shortest_path_dist, longest_path_dist):
         # Color all dead end routes
         def color(progress, path_dist): 
             r = int(255*(progress/path_dist))
@@ -18,36 +12,39 @@ class Solution_image:
             b = 0
             return (r, g, b)
 
-        for path in sol.dead_ends.values():
+        for path in dead_ends.values():
             progress = 0
             for i in range(len(path) - 1):
                 this_node = path[i]
                 next_node = path[i + 1]
 
                 for x in range(this_node.x, next_node.x, -1 if this_node.x > next_node.x else 1):
-                    pixels[x, this_node.y] = color(progress, sol.longest_path_dist)
+                    self.pixels[x, this_node.y] = color(progress, longest_path_dist)
                     progress += 1
 
                 for y in range(this_node.y, next_node.y, -1 if this_node.y > next_node.y else 1):
-                    pixels[this_node.x, y] = color(progress, sol.longest_path_dist)
+                    self.pixels[this_node.x, y] = color(progress, longest_path_dist)
                     progress += 1
 
-        pixels[path[-1].x, path[-1].y] = color(progress, sol.shortest_path_dist)
+        self.pixels[path[-1].x, path[-1].y] = color(progress, shortest_path_dist)
 
-    def __draw_sol(self, sol, pixels):
+    def draw_sol(self, path, color=(0, 0, 255)):
         # Paints shortest path solution
         progress = 0
-        color = (0, 0, 255)
-        for i in range(len(sol.shortest_path) - 1):
-            this_node = sol.shortest_path[i]
-            next_node = sol.shortest_path[i + 1]
+        for i in range(len(path) - 1):
+            this_node = path[i]
+            next_node = path[i + 1]
 
             for x in range(this_node.x, next_node.x, -1 if this_node.x > next_node.x else 1):
-                pixels[x, this_node.y] = color
+                self.pixels[x, this_node.y] = color
                 progress += 1
 
             for y in range(this_node.y, next_node.y, -1 if this_node.y > next_node.y else 1):
-                pixels[this_node.x, y] = color
+                self.pixels[this_node.x, y] = color
                 progress += 1
 
-        pixels[sol.shortest_path[-1].x, sol.shortest_path[-1].y] = color
+        self.pixels[path[-1].x, path[-1].y] = color
+    
+    def save(self, filename):
+        self.im.save("maze_solutions/" + filename)
+        print("Image saved as maze_solutions/" + filename + "\n")

@@ -1,6 +1,9 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 from math import inf
+from sys import setrecursionlimit
+from random import choice
 import heapq
+
 
 
 class Dijkstra:
@@ -45,8 +48,9 @@ class Dijkstra:
             self.longest_path_dist = dist # Last popped item will be deepest dead-end node
             explored.add(tail)
 
-            # Check if dead-end
-            if all(node in explored for node in tail.neighbors):
+            # Check if dead-end. Only useful if not exiting early. 
+            # Dead ends useful for drawing maze depth
+            if all(node in explored for node in tail.neighbors) and not early_exit:
                 self.dead_ends[tail] = self.shortest_paths[tail]
             
             # Push neighboring nodes into heap
@@ -62,3 +66,45 @@ class Dijkstra:
 
         self.shortest_path = self.shortest_paths[end_node]
         self.shortest_path_dist = self.shortest_paths_dist[end_node]
+
+
+class Depth_first_search:
+    def __init__(self, source_node, end_node, heuristic="greedy"):
+        
+        def choose_node(available_neighbors, heuristic="greedy"):
+            # Greedy (default): add neighbor closest to end_node
+            if heuristic == "greedy":
+                min_dist, min_neighbor = inf, None
+                for neighbor in available_neighbors:
+                    dist = neighbor.distance(end_node)
+                    if dist < min_dist:
+                        min_dist, min_neighbor = dist, neighbor
+                return min_neighbor
+
+            # Random: add a random neighbor
+            elif heuristic == "random":
+                if available_neighbors:
+                    return choice(available_neighbors)
+
+            # Naive: choose first non-visited neighbor in list
+            elif heuristic == "naive":
+                return available_neighbors[0]
+                
+        visited = set([source_node])
+        stack = deque([source_node])
+        
+        while stack:
+            node = stack.pop()
+            available_neighbors = [neighbor for neighbor in node.neighbors if neighbor not in visited]
+            if available_neighbors:
+                stack.append(node)
+                new_node = choose_node(available_neighbors)
+                stack.append(new_node)
+                visited.add(new_node)
+
+                if new_node is end_node:
+                    self.path = list(stack)
+                    break
+
+
+        

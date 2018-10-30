@@ -1,4 +1,5 @@
 # examples
+
 A few example mazes compatible with this solver. A brief desciption:
 
 - tiny: Very small!
